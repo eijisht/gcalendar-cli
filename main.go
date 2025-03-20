@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
+	"os"
 
 	"gcal-cli/cmd"
 	"gcal-cli/internal"
@@ -15,7 +15,7 @@ import (
 // TODO: figure out argument and flag parsing
 
 func main() {
-	flags := initFlags()
+	flags := parseStdin()
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -27,27 +27,44 @@ func main() {
 		log.Fatalf("Unable to retrieve Calendar service: %v", err)
 	}
 
-	cmd.Read(srv, *flags.Read, *flags.Count, *flags.Days)
+	if flags.Read {
+		cmd.Read(srv, *flags.Calendar, *flags.Count, *flags.Days)
+	}
 }
 
 type arguments struct {
-	Read  *string
-	Count *int64
-	Days  *int64
+	Read  bool
+	Write bool
+
+	Calendar *string
+	Count    *int64
+	Days     *int64
 }
 
-func initFlags() arguments {
-	readFlag := flag.String("r", "primary", "usage: -r <calendar id>")
-	countFlag := flag.Int64("c", 10, "usage: -u <int>")
-	dayFlag := flag.Int64("d", -1, "usage: -d <int>")
+func parseStdin() arguments {
+	read := false
+	write := false
+
+	if len(os.Args) >= 2 {
+		command := os.Args[1]
+		read = command == "read"
+		write = command == "write"
+
+	}
+
+	calendar := flag.String("r", "primary", "usage: -r <calendar id>")
+	count := flag.Int64("c", 10, "usage: -u <int>")
+	day := flag.Int64("d", -1, "usage: -d <int>")
 
 	// TODO: Improve usage messages
 
 	flag.Parse()
 
 	return arguments{
-		readFlag,
-		countFlag,
-		dayFlag,
+		read,
+		write,
+		calendar,
+		count,
+		day,
 	}
 }
