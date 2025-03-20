@@ -14,6 +14,9 @@ import (
 	"google.golang.org/api/option"
 )
 
+// TODO: add input sanitization
+// TODO: get the user auth code from the http request automatically
+
 func getClient(config *oauth2.Config) *http.Client {
 	token := "token.json"
 	tok, err := tokenFromFile(token)

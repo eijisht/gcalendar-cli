@@ -8,7 +8,6 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
-// TODO: Events in the next X days (TimeMax function from API)
 // TODO: Filter by calendar
 // TODO: Export events
 

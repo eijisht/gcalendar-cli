@@ -1,5 +1,6 @@
 credentials.json
 token.json
+.env
 
 *.exe
 *.out

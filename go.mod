@@ -1,4 +1,4 @@
-module calendartest
+module gcal-cli
 
 go 1.22.7
 
