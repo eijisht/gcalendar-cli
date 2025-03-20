@@ -1,12 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
-	//	"flag"
 
 	"gcal-cli/cmd"
 	"gcal-cli/internal"
+
 	"github.com/joho/godotenv"
 )
 
@@ -14,7 +15,7 @@ import (
 // TODO: figure out argument and flag parsing
 
 func main() {
-	fmt.Println("This is a CLI interface for the Google Calendar API written in Go!")
+	flags := initFlags()
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -26,5 +27,27 @@ func main() {
 		log.Fatalf("Unable to retrieve Calendar service: %v", err)
 	}
 
-	cmd.Read(srv, cmd.DefaultCalendar, cmd.DefaultCount)
+	cmd.Read(srv, *flags.Read, *flags.Count, *flags.Days)
+}
+
+type arguments struct {
+	Read  *string
+	Count *int64
+	Days  *int64
+}
+
+func initFlags() arguments {
+	readFlag := flag.String("r", "primary", "usage: -r <calendar id>")
+	countFlag := flag.Int64("c", 10, "usage: -u <int>")
+	dayFlag := flag.Int64("d", -1, "usage: -d <int>")
+
+	// TODO: Improve usage messages
+
+	flag.Parse()
+
+	return arguments{
+		readFlag,
+		countFlag,
+		dayFlag,
+	}
 }
