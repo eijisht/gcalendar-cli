@@ -26,15 +26,5 @@ func main() {
 		log.Fatalf("Unable to retrieve Calendar service: %v", err)
 	}
 
-	calendars, err := srv.CalendarList.List().Do()
-
-	if err != nil {
-		log.Fatalf("Unable to retrieve Calendar service: %v", err)
-	}
-
-	for _, calendar := range calendars.Items {
-		println(calendar.Summary)
-	}
-
 	cmd.Read(srv, cmd.DefaultCalendar, cmd.DefaultCount)
 }
