@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -12,10 +13,15 @@ import (
 )
 
 // TODO: add caching for API requests (could use SQLite)
-// TODO: figure out argument and flag parsing
+// TODO: help commands
+
+var CREATE_COMMAND string = "write"
+var READ_COMMAND string = "read"
+var UPDATE_COMMAND string = "update"
+var DELETE_COMMAND string = "remove"
 
 func main() {
-	flags := parseStdin()
+	command := parseCommand()
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -27,42 +33,55 @@ func main() {
 		log.Fatalf("Unable to retrieve Calendar service: %v", err)
 	}
 
-	if flags.Read {
+	switch command {
+	case "c":
+		fmt.Printf("Hello from create case!\n")
+	case "r":
+		flags := parseReadRequest()
 		cmd.Read(srv, *flags.Calendar, *flags.Count, *flags.Days)
+	case "":
+		fmt.Printf("No command given. For help, use <gcal help>")
+	default:
+		fmt.Printf("Unknown command %s", command)
 	}
+
 }
 
-type arguments struct {
-	Read  bool
-	Write bool
+func parseCommand() string {
+	if len(os.Args) < 2 {
+		return ""
+	}
 
+	commandMap := map[string]string{
+		CREATE_COMMAND: "c",
+		READ_COMMAND:   "r",
+		UPDATE_COMMAND: "u",
+		DELETE_COMMAND: "d",
+	}
+
+	if short, exists := commandMap[os.Args[1]]; exists {
+		return short
+	}
+
+	return os.Args[1]
+}
+
+type readRequest struct {
 	Calendar *string
 	Count    *int64
 	Days     *int64
 }
 
-func parseStdin() arguments {
-	read := false
-	write := false
-
-	if len(os.Args) >= 2 {
-		command := os.Args[1]
-		read = command == "read"
-		write = command == "write"
-
-	}
-
-	calendar := flag.String("r", "primary", "usage: -r <calendar id>")
-	count := flag.Int64("c", 10, "usage: -u <int>")
+func parseReadRequest() readRequest {
+	calendar := flag.String("c", "primary", "usage: -c <calendar id>")
+	count := flag.Int64("n", 10, "usage: -n <int>")
 	day := flag.Int64("d", -1, "usage: -d <int>")
 
 	// TODO: Improve usage messages
 
 	flag.Parse()
 
-	return arguments{
-		read,
-		write,
+	return readRequest{
 		calendar,
 		count,
 		day,
