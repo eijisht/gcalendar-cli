@@ -3,6 +3,7 @@ package internal
 import (
 	"flag"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -42,6 +43,7 @@ type ReadRequest struct {
 func ParseReadRequest(args []string) ReadRequest {
 
 	readFlags := flag.NewFlagSet("readFlags", flag.ContinueOnError)
+	readFlags.ErrorHandling()
 
 	calendar := readFlags.String("c", "primary", "usage: -c <calendar id>")
 	count := readFlags.Int64("n", 10, "usage: -n <int>")
@@ -53,8 +55,7 @@ func ParseReadRequest(args []string) ReadRequest {
 	err := readFlags.Parse(args[2:])
 
 	if err != nil {
-		fmt.Println("i failed")
-		//TODO:
+		log.Fatalf("Error: %s\n", err)
 	}
 
 	return ReadRequest{
@@ -86,8 +87,7 @@ func ParseCreaterequest(args []string) CreateRequest {
 	err := createFlags.Parse(args[2:])
 
 	if err != nil {
-		fmt.Println("i failed")
-		//TODO:
+		log.Fatalf("Error: %s\n", err)
 	}
 
 	for _, arg := range flag.Args() {

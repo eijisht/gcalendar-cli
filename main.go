@@ -43,6 +43,7 @@ func main() {
 	case "r":
 		flags := internal.ParseReadRequest(os.Args)
 		// Read request segfaults instead of throwing an error if token is too old
+
 		cmd.Read(srv, *flags.Calendar, *flags.Count, *flags.Days)
 	case "":
 		fmt.Printf("No command given. For help, use <gcal help>\n")

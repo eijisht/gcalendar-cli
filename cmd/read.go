@@ -51,5 +51,9 @@ func requestHandler(srv *calendar.Service, calendarName string, maxResults int64
 
 	}
 
+	if err != nil {
+		log.Fatalf("Could not retrieve events: %s\n", err)
+	}
+
 	return *events, err
 }
