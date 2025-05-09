@@ -11,10 +11,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// TODO: add caching for API requests (could use SQLite)
-// TODO: help commands
-
 func main() {
+	log.SetFlags(0)
 	command := internal.ParseCommand(os.Args)
 	if command == "reset" {
 		err := os.Remove("token.json")
@@ -36,18 +34,30 @@ func main() {
 		log.Fatalf("Unable to retrieve Calendar service: %v", err)
 	}
 
-	switch command {
-	case "c":
-		flags := internal.ParseCreaterequest(os.Args)
-		fmt.Println(*flags.Calendar, *flags.End, *flags.Start, *flags.Summary)
-	case "r":
-		flags := internal.ParseReadRequest(os.Args)
-		// Read request segfaults instead of throwing an error if token is too old
+	// test for invalid token
+	_, err = srv.Events.List("primary").MaxResults(1).Do()
+	if err != nil {
+		log.Fatalf("Token invalid or expired: %v\nTry running 'gcalcli reset' to get another token.", err)
+	}
 
-		cmd.Read(srv, *flags.Calendar, *flags.Count, *flags.Days)
-	case "":
-		fmt.Printf("No command given. For help, use <gcal help>\n")
-	default:
+	// returns anonymus function to handle the command
+	handlers := map[string]func(){
+		"c": func() {
+			flags := internal.ParseCreaterequest(os.Args)
+			fmt.Println(*flags.Calendar, *flags.End, *flags.Start, *flags.Summary)
+		},
+
+		"r": func() {
+			flags := internal.ParseReadRequest(os.Args)
+			cmd.Read(srv, *flags.Calendar, *flags.Count, *flags.Days)
+		},
+	}
+
+	if handler, found := handlers[command]; found {
+		handler()
+	} else if command == "" {
+		fmt.Println("No command given. For help, use <gcal help>")
+	} else {
 		fmt.Printf("Unknown command %s\n", command)
 	}
 

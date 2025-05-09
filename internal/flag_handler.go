@@ -45,8 +45,8 @@ func ParseReadRequest(args []string) ReadRequest {
 	readFlags := flag.NewFlagSet("readFlags", flag.ContinueOnError)
 	readFlags.ErrorHandling()
 
-	calendar := readFlags.String("c", "primary", "usage: -c <calendar id>")
-	count := readFlags.Int64("n", 10, "usage: -n <int>")
+	calendar := readFlags.String("n", "primary", "usage: -c <calendar id>")
+	count := readFlags.Int64("c", 10, "usage: -n <int>")
 	day := readFlags.Int64("d", -1, "usage: -d <int>")
 
 	// TODO: Improve usage messages
@@ -79,8 +79,8 @@ type CreateRequest struct {
 func ParseCreaterequest(args []string) CreateRequest {
 	createFlags := flag.NewFlagSet("createFlags", flag.ContinueOnError)
 
-	calendar := createFlags.String("c", "primary", "")
-	summary := createFlags.String("n", "CLI Event", "")
+	calendar := createFlags.String("n", "primary", "")
+	summary := createFlags.String("s", "CLI Event", "")
 	endTime := createFlags.String("end", time.Now().Format(time.RFC3339), "")
 	startTime := createFlags.String("start", time.Now().Format(time.RFC3339), "")
 

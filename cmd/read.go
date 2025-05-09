@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	//	"gcal-cli/internal"
+
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -30,6 +32,13 @@ func Read(srv *calendar.Service, calendar string, maxResults int64, maxDays int6
 func requestHandler(srv *calendar.Service, calendarName string, maxResults int64, maxDays int64) (calendar.Events, error) {
 	var err error
 	var events *calendar.Events
+
+	_, err = srv.Calendars.Get(calendarName).Do()
+	// could cache the user events and update periodically to reduce api calls and error check
+
+	if err != nil {
+		log.Fatalf("Unable to get events: Calendar does not exist\n")
+	}
 
 	if maxDays == -1 {
 		events, err = srv.Events.List(calendarName).

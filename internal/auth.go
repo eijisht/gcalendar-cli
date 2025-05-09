@@ -25,8 +25,11 @@ func getClient(config *oauth2.Config) *http.Client {
 		tok = getTokenFromWeb(config)
 		saveToken(token, tok)
 	}
+	ctx := context.Background()
+	tokenSource := config.TokenSource(ctx, tok)
+	client := oauth2.NewClient(ctx, tokenSource)
 
-	return config.Client(context.Background(), tok)
+	return client
 }
 
 func tokenFromFile(file string) (*oauth2.Token, error) {
@@ -42,6 +45,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	printWelcomeMessage()
 	fmt.Printf("Open this URL in a browser and authorize: \n%s\n", authURL)
 
 	var authCode string
@@ -80,5 +84,11 @@ func GetCalendarService() (*calendar.Service, error) {
 
 	client := getClient(config)
 
-	return calendar.NewService(context.TODO(), option.WithHTTPClient(client))
+	srv, err := calendar.NewService(context.Background(), option.WithHTTPClient(client))
+
+	return srv, err
+}
+
+func printWelcomeMessage() {
+	fmt.Printf("")
 }
