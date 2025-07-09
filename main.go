@@ -14,6 +14,7 @@ import (
 func main() {
 	log.SetFlags(0)
 	command := internal.ParseCommand(os.Args)
+
 	if command == "reset" {
 		err := os.Remove("token.json")
 		if err != nil {
