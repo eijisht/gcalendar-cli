@@ -7,8 +7,6 @@ import (
 
 	"gcal-cli/cmd"
 	"gcal-cli/internal"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -23,11 +21,6 @@ func main() {
 		}
 		fmt.Printf("Removed token.json\n")
 		return
-	}
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %s", err)
 	}
 
 	srv, err := internal.GetCalendarService()
