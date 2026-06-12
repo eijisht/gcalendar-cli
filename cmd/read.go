@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	//	"gcal-cli/internal"
@@ -13,10 +12,10 @@ import (
 // TODO: Filter by calendar
 // TODO: Export events
 
-func Read(srv *calendar.Service, calendar string, maxResults int64, maxDays int64) {
+func Read(srv *calendar.Service, calendar string, maxResults int64, maxDays int64) error {
 	events, err := requestHandler(srv, calendar, maxResults, maxDays)
 	if err != nil {
-		log.Fatalf("Unable to retrieve events: %v", err)
+		return fmt.Errorf("error reading from calendar: %s\n", err)
 	}
 
 	for _, item := range events.Items {
@@ -27,6 +26,8 @@ func Read(srv *calendar.Service, calendar string, maxResults int64, maxDays int6
 
 		fmt.Printf("%s: %s\n", date, item.Summary)
 	}
+
+	return nil
 }
 
 func requestHandler(srv *calendar.Service, calendarName string, maxResults int64, maxDays int64) (calendar.Events, error) {
@@ -37,7 +38,7 @@ func requestHandler(srv *calendar.Service, calendarName string, maxResults int64
 	// could cache the user events and update periodically to reduce api calls and error check
 
 	if err != nil {
-		log.Fatalf("Unable to get events: Calendar does not exist\n")
+		return calendar.Events{}, fmt.Errorf("could not fetch calendar: %s\n", err)
 	}
 
 	if maxDays == -1 {
@@ -61,7 +62,7 @@ func requestHandler(srv *calendar.Service, calendarName string, maxResults int64
 	}
 
 	if err != nil {
-		log.Fatalf("Could not retrieve events: %s\n", err)
+		return *events, fmt.Errorf("could not retrieve events: %s\n", err)
 	}
 
 	return *events, err

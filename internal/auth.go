@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -17,19 +16,22 @@ import (
 // TODO: add input sanitization
 // TODO: get the user auth code from the http request automatically
 
-func getClient(config *oauth2.Config) *http.Client {
+func getClient(config *oauth2.Config) (*http.Client, error) {
 	token := "token.json"
 	tok, err := tokenFromFile(token)
 
 	if err != nil {
-		tok = getTokenFromWeb(config)
+		tok, err = getTokenFromWeb(config)
+		if err != nil {
+			return nil, fmt.Errorf("could not get token from web: %s\n", err)
+		}
 		saveToken(token, tok)
 	}
 	ctx := context.Background()
 	tokenSource := config.TokenSource(ctx, tok)
 	client := oauth2.NewClient(ctx, tokenSource)
 
-	return client
+	return client, nil
 }
 
 func tokenFromFile(file string) (*oauth2.Token, error) {
@@ -43,7 +45,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	return tok, err
 }
 
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
+func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	printWelcomeMessage()
 	fmt.Printf("Open this URL in a browser and authorize: \n%s\n", authURL)
@@ -54,35 +56,39 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 
 	tok, err := config.Exchange(context.Background(), authCode)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		return nil, fmt.Errorf("could not exchange user token: %s\n", err)
 	}
 
-	return tok
+	return tok, nil
 }
 
-func saveToken(file string, token *oauth2.Token) {
+func saveToken(file string, token *oauth2.Token) error {
 	f, err := os.Create(file)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		return fmt.Errorf("Unable to retrieve token from web: %v", err)
 	}
 
 	defer f.Close()
 	json.NewEncoder(f).Encode(token)
+	return nil
 }
 
 func GetCalendarService() (*calendar.Service, error) {
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
-		log.Fatalf("Unable to parse client secret file: %v", err)
+		return nil, fmt.Errorf("unable to read credentials.json: %w", err)
 	}
 
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 
 	if err != nil {
-		log.Fatalf("Unable to parse client secret file: %v", err)
+		return nil, fmt.Errorf("unable to parse client secret file: %w", err)
 	}
 
-	client := getClient(config)
+	client, err := getClient(config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get client: %s", err)
+	}
 
 	srv, err := calendar.NewService(context.Background(), option.WithHTTPClient(client))
 
