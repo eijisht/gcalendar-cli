@@ -54,6 +54,15 @@ func main() {
 				log.Fatalf("read failed: %v", err)
 			}
 		},
+
+		"d": func() {
+			if len(os.Args) < 3 {
+				log.Fatalf("usage: gcal remove <eventID>")
+			}
+			if err := cmd.Delete(srv, "primary", os.Args[2]); err != nil {
+				log.Fatalf("delete failed: %v", err)
+			}
+		},
 	}
 
 	if handler, found := handlers[command]; found {
