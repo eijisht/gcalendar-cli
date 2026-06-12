@@ -2,8 +2,11 @@ package internal
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 
@@ -46,20 +49,71 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	printWelcomeMessage()
-	fmt.Printf("Open this URL in a browser and authorize: \n%s\n", authURL)
-
-	var authCode string
-	fmt.Print("Enter the authorization code: ")
-	fmt.Scan(&authCode)
-
-	tok, err := config.Exchange(context.Background(), authCode)
+	// Listen on a random free loopback port for Google's redirect.
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		return nil, fmt.Errorf("could not exchange user token: %s\n", err)
+		return nil, fmt.Errorf("could not start local server: %w", err)
+	}
+	defer listener.Close()
+
+	config.RedirectURL = fmt.Sprintf("http://%s/callback", listener.Addr().String())
+
+	// Random state value to guard against CSRF on the callback.
+	state, err := randomState()
+	if err != nil {
+		return nil, err
+	}
+
+	codeCh := make(chan string, 1)
+	errCh := make(chan error, 1)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		if query.Get("state") != state {
+			http.Error(w, "state mismatch", http.StatusBadRequest)
+			errCh <- fmt.Errorf("state mismatch in oauth callback")
+			return
+		}
+		code := query.Get("code")
+		if code == "" {
+			http.Error(w, "missing authorization code", http.StatusBadRequest)
+			errCh <- fmt.Errorf("no authorization code in oauth callback")
+			return
+		}
+		fmt.Fprintln(w, "Authentication complete. You can close this tab and return to the terminal.")
+		codeCh <- code
+	})
+
+	server := &http.Server{Handler: mux}
+	go server.Serve(listener)
+	defer server.Shutdown(context.Background())
+
+	authURL := config.AuthCodeURL(state, oauth2.AccessTypeOffline)
+	printWelcomeMessage()
+	fmt.Printf("Open this URL in your browser to authorize:\n%s\n\nWaiting for authorization...\n", authURL)
+
+	var code string
+	select {
+	case code = <-codeCh:
+	case err = <-errCh:
+		return nil, err
+	}
+
+	tok, err := config.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, fmt.Errorf("could not exchange user token: %w", err)
 	}
 
 	return tok, nil
+}
+
+func randomState() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("could not generate state: %w", err)
+	}
+	return hex.EncodeToString(b), nil
 }
 
 func saveToken(file string, token *oauth2.Token) error {
