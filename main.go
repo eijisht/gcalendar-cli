@@ -18,6 +18,14 @@ func main() {
 		return
 	}
 
+	if command == "init" {
+		if err := internal.InitToken(); err != nil {
+			log.Fatalf("init failed: %v", err)
+		}
+		fmt.Printf("Authentication complete. Token saved to token.json\n")
+		return
+	}
+
 	if command == "reset" {
 		err := os.Remove("token.json")
 		if err != nil {
@@ -79,6 +87,7 @@ Usage:
   gcal read   [-n calendar] [-c count] [-d days]
   gcal create -s summary [-desc text] -start "2006-01-02 15:04" -end "2006-01-02 15:04"
   gcal remove <eventID>
+  gcal init   (authenticate and save token.json)
   gcal reset  (delete the cached auth token)
   gcal help`)
 }

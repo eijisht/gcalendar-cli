@@ -12,6 +12,7 @@ const (
 	updateCommand string = "update"
 	deleteCommand string = "remove"
 	resetCommand  string = "reset"
+	initCommand   string = "init"
 )
 
 func ParseCommand(args []string) string {
@@ -25,6 +26,7 @@ func ParseCommand(args []string) string {
 		updateCommand: "u",
 		deleteCommand: "d",
 		resetCommand:  "reset",
+		initCommand:   "init",
 	}
 
 	if short, exists := commandMap[args[1]]; exists {

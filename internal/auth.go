@@ -73,16 +73,40 @@ func saveToken(file string, token *oauth2.Token) error {
 	return nil
 }
 
-func GetCalendarService() (*calendar.Service, error) {
+func loadConfig() (*oauth2.Config, error) {
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
 		return nil, fmt.Errorf("unable to read credentials.json: %w", err)
 	}
 
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
-
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse client secret file: %w", err)
+	}
+
+	return config, nil
+}
+
+// InitToken runs the OAuth flow and writes token.json, replacing any existing
+// token. Use it for first-time setup or to re-authenticate.
+func InitToken() error {
+	config, err := loadConfig()
+	if err != nil {
+		return err
+	}
+
+	tok, err := getTokenFromWeb(config)
+	if err != nil {
+		return err
+	}
+
+	return saveToken("token.json", tok)
+}
+
+func GetCalendarService() (*calendar.Service, error) {
+	config, err := loadConfig()
+	if err != nil {
+		return nil, err
 	}
 
 	client, err := getClient(config)
@@ -90,9 +114,7 @@ func GetCalendarService() (*calendar.Service, error) {
 		return nil, fmt.Errorf("unable to get client: %s", err)
 	}
 
-	srv, err := calendar.NewService(context.Background(), option.WithHTTPClient(client))
-
-	return srv, err
+	return calendar.NewService(context.Background(), option.WithHTTPClient(client))
 }
 
 func printWelcomeMessage() {
