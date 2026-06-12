@@ -13,6 +13,11 @@ func main() {
 	log.SetFlags(0)
 	command := internal.ParseCommand(os.Args)
 
+	if command == "" || command == "help" {
+		printUsage()
+		return
+	}
+
 	if command == "reset" {
 		err := os.Remove("token.json")
 		if err != nil {
@@ -53,10 +58,18 @@ func main() {
 
 	if handler, found := handlers[command]; found {
 		handler()
-	} else if command == "" {
-		fmt.Println("No command given. For help, use <gcal help>")
 	} else {
-		fmt.Printf("Unknown command %s\n", command)
+		fmt.Printf("Unknown command. Run 'gcal help' for usage.\n")
 	}
+}
 
+func printUsage() {
+	fmt.Println(`gcal - Google Calendar CLI
+
+Usage:
+  gcal read   [-n calendar] [-c count] [-d days]
+  gcal create -s summary [-desc text] -start "2006-01-02 15:04" -end "2006-01-02 15:04"
+  gcal remove <eventID>
+  gcal reset  (delete the cached auth token)
+  gcal help`)
 }
