@@ -67,10 +67,11 @@ func ParseReadRequest(args []string) ReadRequest {
 }
 
 type CreateRequest struct {
-	Calendar *string
-	Summary  *string
-	End      *string // can be just a date
-	Start    *string // can be just a date
+	Calendar    *string
+	Summary     *string
+	Description *string
+	End         *string // can be just a date
+	Start       *string // can be just a date
 
 	// TODO:
 	// Attendees
@@ -82,6 +83,7 @@ func ParseCreateRequest(args []string) CreateRequest {
 
 	calendar := createFlags.String("n", "primary", "")
 	summary := createFlags.String("s", "CLI Event", "")
+	description := createFlags.String("desc", "", "")
 	endTime := createFlags.String("end", time.Now().Format(time.RFC3339), "")
 	startTime := createFlags.String("start", time.Now().Format(time.RFC3339), "")
 
@@ -100,6 +102,7 @@ func ParseCreateRequest(args []string) CreateRequest {
 	return CreateRequest{
 		calendar,
 		summary,
+		description,
 		endTime,
 		startTime,
 	}

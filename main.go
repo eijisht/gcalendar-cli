@@ -38,12 +38,16 @@ func main() {
 	handlers := map[string]func(){
 		"c": func() {
 			flags := internal.ParseCreateRequest(os.Args)
-			fmt.Println(*flags.Calendar, *flags.End, *flags.Start, *flags.Summary)
+			if err := cmd.Create(srv, *flags.Calendar, *flags.Summary, *flags.Description, *flags.Start, *flags.End); err != nil {
+				log.Fatalf("create failed: %v", err)
+			}
 		},
 
 		"r": func() {
 			flags := internal.ParseReadRequest(os.Args)
-			cmd.Read(srv, *flags.Calendar, *flags.Count, *flags.Days)
+			if err := cmd.Read(srv, *flags.Calendar, *flags.Count, *flags.Days); err != nil {
+				log.Fatalf("read failed: %v", err)
+			}
 		},
 	}
 
