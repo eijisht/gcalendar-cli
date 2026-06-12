@@ -1,7 +1,7 @@
 credentials.json
 token.json
 .env
-Makefile
+.DS_Store
 
 TODO.txt
 *.exe
