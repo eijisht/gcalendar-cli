@@ -24,7 +24,7 @@ func Read(srv *calendar.Service, calendar string, maxResults int64, maxDays int6
 			date = item.Start.Date
 		}
 
-		fmt.Printf("%s: %s\n", date, item.Summary)
+		fmt.Printf("%s  %s  %s\n", item.Id, date, item.Summary)
 	}
 
 	return nil

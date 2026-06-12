@@ -32,7 +32,7 @@ func Create(srv *calendar.Service, calendarID, summary, description, startStr, e
 		return fmt.Errorf("creating event: %w", err)
 	}
 
-	fmt.Printf("Created event: %s\n", created.HtmlLink)
+	fmt.Printf("Created event %s\n%s\n", created.Id, created.HtmlLink)
 	return nil
 }
 
