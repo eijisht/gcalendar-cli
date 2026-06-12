@@ -76,7 +76,7 @@ func GetCalendarService() (*calendar.Service, error) {
 		log.Fatalf("Unable to parse client secret file: %v", err)
 	}
 
-	config, err := google.ConfigFromJSON(b, calendar.CalendarReadonlyScope)
+	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file: %v", err)
