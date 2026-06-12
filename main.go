@@ -37,7 +37,7 @@ func main() {
 	// returns anonymus function to handle the command
 	handlers := map[string]func(){
 		"c": func() {
-			flags := internal.ParseCreaterequest(os.Args)
+			flags := internal.ParseCreateRequest(os.Args)
 			fmt.Println(*flags.Calendar, *flags.End, *flags.Start, *flags.Summary)
 		},
 

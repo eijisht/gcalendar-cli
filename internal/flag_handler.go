@@ -7,12 +7,13 @@ import (
 	"time"
 )
 
-var CREATE_COMMAND string = "create"
-var READ_COMMAND string = "read"
-var UPDATE_COMMAND string = "update"
-var DELETE_COMMAND string = "remove"
-
-var RESET_COMMAND string = "reset"
+const (
+	createCommand string = "create"
+	readCommand   string = "read"
+	updateCommand string = "update"
+	deleteCommand string = "remove"
+	resetCommand  string = "reset"
+)
 
 func ParseCommand(args []string) string {
 	if len(args) < 2 {
@@ -20,11 +21,11 @@ func ParseCommand(args []string) string {
 	}
 
 	commandMap := map[string]string{
-		CREATE_COMMAND: "c",
-		READ_COMMAND:   "r",
-		UPDATE_COMMAND: "u",
-		DELETE_COMMAND: "d",
-		RESET_COMMAND:  "reset",
+		createCommand: "c",
+		readCommand:   "r",
+		updateCommand: "u",
+		deleteCommand: "d",
+		resetCommand:  "reset",
 	}
 
 	if short, exists := commandMap[args[1]]; exists {
@@ -76,7 +77,7 @@ type CreateRequest struct {
 	// Color ID
 }
 
-func ParseCreaterequest(args []string) CreateRequest {
+func ParseCreateRequest(args []string) CreateRequest {
 	createFlags := flag.NewFlagSet("createFlags", flag.ContinueOnError)
 
 	calendar := createFlags.String("n", "primary", "")
