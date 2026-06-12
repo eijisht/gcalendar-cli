@@ -2,7 +2,6 @@ package internal
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"time"
 )
@@ -81,23 +80,18 @@ type CreateRequest struct {
 func ParseCreateRequest(args []string) CreateRequest {
 	createFlags := flag.NewFlagSet("createFlags", flag.ContinueOnError)
 
+	now := time.Now().Format("2006-01-02 15:04")
 	calendar := createFlags.String("n", "primary", "")
 	summary := createFlags.String("s", "CLI Event", "")
 	description := createFlags.String("desc", "", "")
-	endTime := createFlags.String("end", time.Now().Format(time.RFC3339), "")
-	startTime := createFlags.String("start", time.Now().Format(time.RFC3339), "")
+	startTime := createFlags.String("start", now, "")
+	endTime := createFlags.String("end", now, "")
 
 	err := createFlags.Parse(args[2:])
 
 	if err != nil {
 		log.Fatalf("Error: %s\n", err)
 	}
-
-	for _, arg := range flag.Args() {
-		fmt.Println(arg)
-	}
-
-	fmt.Println("calendar = ", *calendar)
 
 	return CreateRequest{
 		calendar,
